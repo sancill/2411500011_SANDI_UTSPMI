@@ -1,33 +1,50 @@
 import 'package:flutter/material.dart';
-import 'LoginPage.dart';
-import 'DashboardPage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/beranda_page.dart';
+import 'pages/login_page.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool? isLogin;
+
+  @override
+  void initState() {
+    super.initState();
+    checkLogin();
+  }
+
+  Future<void> checkLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    bool loginStatus = prefs.getBool('isLogin') ?? false;
+
+    setState(() {
+      isLogin = loginStatus;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLogin == null) {
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      ); // MaterialApp
+    }
+
     return MaterialApp(
-      title: 'Daily Activity App',
       debugShowCheckedModeBanner: false,
-      // Requirement 7: Mengatur ThemeData sesuai instruksi UTS poin 7.b
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(fontSize: 16.0, color: Colors.black87),
-          titleLarge: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
-        ),
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const LoginPage(),
-        '/dashboard': (context) => const DashboardPage(),
-      },
-    );
+      title: "Simple Login Flutter",
+      home: isLogin! ? const BerandaPage() : const LoginPage(),
+    ); // MaterialApp
   }
 }
